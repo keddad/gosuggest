@@ -4,10 +4,11 @@ import (
 	"github.com/agnivade/levenshtein"
 	"github.com/gammazero/deque"
 	"sort"
+	"strings"
 )
 
 const (
-	SearchRange  = 15
+	SearchRange  = 30 // Number of hops BFS will search through. Can be modified to increase performance.
 	QueryAnswers = 5
 )
 
@@ -34,12 +35,14 @@ func (N *node) getWord() []rune {
 }
 
 type Trie struct {
-	root *node
+	root  *node
+	Words int
 }
 
 func InitTrie() *Trie {
 	return &Trie{
-		root: &node{},
+		root:  &node{},
+		Words: 0,
 	}
 }
 
@@ -80,7 +83,10 @@ func (T *Trie) Insert(word []rune, word_score int) {
 		currentNode = next
 	}
 
-	currentNode.isEnd = true
+	if !currentNode.isEnd {
+		currentNode.isEnd = true
+		T.Words++
+	}
 	currentNode.score = word_score
 }
 
@@ -95,7 +101,7 @@ func (T *Trie) FindClosest(word []rune) [][]rune {
 		}
 
 		currentNode = next
-	}
+	} // Use simple search as long as we can
 
 	type queueItem struct {
 		node *node
@@ -111,7 +117,7 @@ func (T *Trie) FindClosest(word []rune) [][]rune {
 	foundItems := make([]foundItem, 0)
 	metNodes := make(map[*node]bool)
 
-	q.PushBack(&queueItem{node: currentNode, hops: 0})
+	q.PushBack(&queueItem{node: currentNode, hops: 0}) // After that, use BFS to find closest words
 
 	for q.Len() != 0 {
 		item := q.PopFront().(*queueItem)
@@ -124,7 +130,16 @@ func (T *Trie) FindClosest(word []rune) [][]rune {
 
 		if item.node.isEnd {
 			currentWord := item.node.getWord()
-			foundItems = append(foundItems, foundItem{word: currentWord, score: 10 + item.node.score - (levenshtein.ComputeDistance(string(word), string(currentWord)) - len(word) - len(currentWord))}) // Closest matches are more important than just good options. If the word is bigger then query, forgive some levenshtein penalty.
+
+			baseScore := 10 + item.node.score
+
+			if strings.HasPrefix(string(currentWord), string(word)) {
+				baseScore += 5 // Bonus for continued options
+			} else {
+				baseScore -= levenshtein.ComputeDistance(string(currentWord), string(word)) / 2 // Penalty for distance
+			}
+
+			foundItems = append(foundItems, foundItem{word: currentWord, score: baseScore})
 		}
 
 		if item.hops < SearchRange {
