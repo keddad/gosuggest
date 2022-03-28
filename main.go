@@ -42,7 +42,7 @@ func main() {
 		trie.Insert([]rune(line[1]), score)
 	}
 
-	fmt.Printf("Trie built. Size is: %d \n", trie.Words)
+	fmt.Printf("Trie built. Size is: %d entries\n", trie.Words)
 	reader := bufio.NewReader(os.Stdin)
 
 	for true {

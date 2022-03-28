@@ -134,6 +134,9 @@ func (T *Trie) FindClosest(word []rune) [][]rune {
 			baseScore := 10 + item.node.score
 
 			if strings.HasPrefix(string(currentWord), string(word)) {
+				if len(currentWord) == len(word) { // equal
+					baseScore += 1000 // Exact match is always the best
+				}
 				baseScore += 5 // Bonus for continued options
 			} else {
 				baseScore -= levenshtein.ComputeDistance(string(currentWord), string(word)) / 2 // Penalty for distance
