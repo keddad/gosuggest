@@ -5,30 +5,28 @@ import (
 	"encoding/csv"
 	"fmt"
 	"github.com/keddad/gosuggest/trie"
-	"log"
 	"os"
 	"strconv"
 )
 
-func readCsvFile(filePath string) [][]string {
-	// https://stackoverflow.com/questions/24999079/reading-csv-file-in-go
-	f, err := os.Open(filePath)
+func readFile(file string) [][]string {
+	f, err := os.Open(file)
 	if err != nil {
-		log.Fatal("Unable to read input file "+filePath, err)
+		panic(err)
 	}
 	defer f.Close()
 
 	csvReader := csv.NewReader(f)
-	records, err := csvReader.ReadAll()
+	lines, err := csvReader.ReadAll()
 	if err != nil {
-		log.Fatal("Unable to parse file as CSV for "+filePath, err)
+		panic(err)
 	}
 
-	return records
+	return lines
 }
 
 func main() {
-	lines := readCsvFile("data.csv")
+	lines := readFile("data.csv")
 	localTrie := trie.InitTrie()
 
 	for _, line := range lines {
