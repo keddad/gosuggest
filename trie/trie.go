@@ -62,7 +62,7 @@ func binarySearch(arr []*node, target rune) (*node, bool) {
 	return nil, false
 }
 
-func (T *Trie) Insert(word []rune, word_score int) {
+func (T *Trie) Insert(word []rune, wordScore int) {
 	currentNode := T.root
 
 	for currentChar := 0; currentChar < len(word); currentChar++ {
@@ -87,7 +87,7 @@ func (T *Trie) Insert(word []rune, word_score int) {
 		currentNode.isEnd = true
 		T.Words++
 	}
-	currentNode.score = word_score
+	currentNode.score = wordScore
 }
 
 func (T *Trie) FindClosest(word []rune) [][]rune {
